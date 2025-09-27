@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>官方认证-安全访问</title>
+    <style>
+        .loading-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .security-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #28a745;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+        .block-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+        .security-text, .block-text {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .security-text {
+            color: #28a745;
+        }
+        .block-text {
+            color: #dc3545;
+        }
+        .loading-tip, .block-tip {
+            color: #6c757d;
+            font-size: 14px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .block-tip {
+            color: #dc3545;
+        }
+        .content{
+            height:100%;
+            width:100%;
+            position: fixed;
+            left: -2px;
+            top: -2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container" id="loadingContainer">
+        <div class="security-icon">✓</div>
+        <div class="security-text">官方安全验证</div>
+        <div class="loading-tip">正在进行身份认证与安全协议验证，请稍候...</div>
+    </div>
+
+    <script>
+        // 读取生成界面保存的配置
+        const config = JSON.parse(localStorage.getItem('iframeConfig') || '{"domains":[],"allowSub":true}');
+        const mainDomains = config.domains;
+        const allowSubdomain = config.allowSub;
+
+        // 从URL参数中获取Base64编码的目标URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedParam = urlParams.get('c');
+        const tureurl = encodedParam ? atob(encodedParam) : '';
+
+        // 提取域名并校验
+        function getDomainFromUrl(url) {
+            let domain;
+            try {
+                domain = new URL(url).hostname.replace(/^www\./, "");
+            } catch (e) {
+                domain = "";
+            }
+            return domain;
+        }
+
+        if (tureurl.includes("http") && mainDomains.length > 0) {
+            const targetDomain = getDomainFromUrl(tureurl);
+            const isAllowed = mainDomains.some(domain => {
+                return allowSubdomain 
+                    ? targetDomain.endsWith(`.${domain}`) || targetDomain === domain 
+                    : targetDomain === domain;
+            });
+
+            if (isAllowed) {
+                document.getElementById("loadingContainer").style.display = "none";
+                document.writeln(`<iframe class="content" src="${tureurl}" width="100%" height="100%"></iframe>`);
+            } else {
+                document.getElementById("loadingContainer").innerHTML = `
+                    <div class="block-icon">×</div>
+                    <div class="block-text">访问被拦截</div>
+                    <div class="block-tip">当前域名（${targetDomain}）未在安全白名单内，禁止访问</div>
+                `;
+            }
+        } else {
+            document.getElementById("loadingContainer").innerHTML = `
+                <div class="block-icon">×</div>
+                <div class="block-text">访问异常</div>
+                <div class="block-tip">未检测到有效URL或白名单配置为空</div>
+            `;
+        }
+    </script>
+</body>
+</html>
