@@ -1,131 +1,195 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>官方认证-安全访问</title>
-    <style>
-        .loading-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .security-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #28a745;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
-            margin-bottom: 15px;
-        }
-        .block-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #dc3545;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
-            margin-bottom: 15px;
-        }
-        .security-text, .block-text {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-        .security-text {
-            color: #28a745;
-        }
-        .block-text {
-            color: #dc3545;
-        }
-        .loading-tip, .block-tip {
-            color: #6c757d;
-            font-size: 14px;
-            text-align: center;
-            padding: 0 20px;
-        }
-        .block-tip {
-            color: #dc3545;
-        }
-        .content{
-            height:100%;
-            width:100%;
-            position: fixed;
-            left: -2px;
-            top: -2px;
-        }
-    </style>
+  <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="black" name="apple-mobile-web-app-status-bar-style">
+  <meta content="320" name="MobileOptimized">
+  <title>官方认证-安全访问</title>
+<style>
+/* 加载容器样式 */
+.loading-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+/* 安全访问文字样式 */
+.security-text {
+    font-size: 24px;
+    color: #28a745; /* 安全绿 */
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+/* 错误提示文字样式 */
+.error-text {
+    font-size: 24px;
+    color: #dc3545; /* 错误红 */
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+/* 安全图标样式 */
+.security-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #28a745;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+/* 错误图标样式 */
+.error-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+/* 加载提示文字 */
+.loading-tip {
+    color: #6c757d;
+    font-size: 14px;
+    text-align: center;
+    padding: 0 20px;
+}
+/* iframe容器样式 */
+.content{
+    height:100%;
+    width:100%;
+    position: fixed;
+    left: -2px;
+    top: -2px;
+}
+</style>
 </head>
 <body>
-    <div class="loading-container" id="loadingContainer">
-        <div class="security-icon">✓</div>
-        <div class="security-text">官方安全验证</div>
-        <div class="loading-tip">正在进行身份认证与安全协议验证，请稍候...</div>
-    </div>
+<div class="loading-container" id="loadingContainer">
+    <div class="security-icon">✓</div>
+    <div class="security-text">官方安全验证</div>
+    <div class="loading-tip">正在进行身份认证与安全协议验证，请稍候...</div>
+</div>
+<script>
+// 立即执行参数解析和处理，无任何延迟
+(function() {
+    // 1. 配置白名单：填主域名，自动兼容HTTP/HTTPS及所有子域名
+    const WHITELIST_PURE_DOMAINS = [
+        "example.com",   // 示例1：自动匹配 http/https + 子域名
+        "test.com",     // 示例2：自动匹配 http/https + 子域名
+        "abc.cn"        // 示例3：自动匹配 http/https + 子域名
+    ];
 
-    <script>
-        // 读取生成界面保存的配置
-        const config = JSON.parse(localStorage.getItem('iframeConfig') || '{"domains":[],"allowSub":true}');
-        const mainDomains = config.domains;
-        const allowSubdomain = config.allowSub;
+    var urlParams = new URLSearchParams(window.location.search);
+    var encodedParam = urlParams.get('c');
+    var tureurl = encodedParam ? atob(encodedParam) : "";
+    var loadingContainer = document.getElementById("loadingContainer");
 
-        // 从URL参数中获取Base64编码的目标URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedParam = urlParams.get('c');
-        const tureurl = encodedParam ? atob(encodedParam) : '';
-
-        // 提取域名并校验
-        function getDomainFromUrl(url) {
-            let domain;
-            try {
-                domain = new URL(url).hostname.replace(/^www\./, "");
-            } catch (e) {
-                domain = "";
-            }
-            return domain;
-        }
-
-        if (tureurl.includes("http") && mainDomains.length > 0) {
-            const targetDomain = getDomainFromUrl(tureurl);
-            const isAllowed = mainDomains.some(domain => {
-                return allowSubdomain 
-                    ? targetDomain.endsWith(`.${domain}`) || targetDomain === domain 
-                    : targetDomain === domain;
+    // 白名单验证逻辑：主域名匹配（兼容协议+子域名）
+    if (tureurl.includes("http")) {
+        let isAuthorized = false;
+        try {
+            // 解析目标链接的“主域名”（如从 https://www.baidu.com/小郑nb 提取 baidu.com）
+            const targetUrl = new URL(tureurl);
+            const targetPureDomain = targetUrl.hostname; // 得到如 www.baidu.com 的完整主机名
+            
+            // 检查：目标主机名是否是白名单主域名的“主体”或“子域名”
+            isAuthorized = WHITELIST_PURE_DOMAINS.some(whiteDomain => {
+                return targetPureDomain === whiteDomain || targetPureDomain.endsWith(`.${whiteDomain}`);
             });
-
-            if (isAllowed) {
-                document.getElementById("loadingContainer").style.display = "none";
-                document.writeln(`<iframe class="content" src="${tureurl}" width="100%" height="100%"></iframe>`);
+        } catch (e) {
+            console.log("链接解析失败:", e);
+            isAuthorized = false;
+        }
+        
+        if (isAuthorized) {
+            // 加载页延迟3秒后 再隐藏开始加载链接
+            setTimeout(() => {
+                loadingContainer.style.display = "none";
+                var html = '<iframe class="content" onload="bindMouseWhee(this)" src="' + tureurl + '"></iframe>';
+                document.writeln(html);
+                console.log("验证通过，加载链接：", tureurl);
+            }, 3000); // 3000毫秒 = 3秒，可按需调整
+        } else {
+            // 验证失败：修改加载容器为错误提示
+            loadingContainer.innerHTML = `
+                <div class="error-icon">!</div>
+                <div class="error-text">非法链接</div>
+                <div class="loading-tip">当前链接不在安全白名单内，无法访问<br>请联系管理员添加授权</div>
+            `;
+            console.log("验证失败，链接不在白名单：", tureurl);
+        }
+    } else {
+        // 显示错误提示
+        loadingContainer.innerHTML = `
+            <div class="error-icon">!</div>
+            <div class="error-text">无效链接</div>
+            <div class="loading-tip">未检测到有效访问链接，请检查参数是否正确</div>
+        `;
+        console.log("未检测到有效http链接");
+    }
+})();
+</script>
+<script>
+var firefox = navigator.userAgent.indexOf('Firefox') != -1;
+// 修改鼠标滚轮事件处理，避免跨域错误提示
+function MouseWheel(e, doc) {
+    try {
+        e.preventDefault && e.preventDefault();
+        e.returnValue = false;
+        var up = firefox && e.detail < 0 || e.wheelDelta > 0;
+        doc.body.scrollTop = doc.documentElement.scrollTop += up ? -50 : 50;
+    } catch (e) {
+        console.log('跨域环境下无法控制滚动:', e);
+    }
+}
+function bindMouseWhee(ifr) {
+    try {
+        // 检查是否同源
+        var isSameOrigin = false;
+        try {
+            // 尝试访问origin属性验证是否同源
+            var iframeOrigin = new URL(ifr.src).origin;
+            isSameOrigin = window.location.origin === iframeOrigin;
+        } catch (e) {
+            console.log('无法验证同源性:', e);
+        }
+        if (isSameOrigin) {
+            var doc = ifr.contentWindow.document;
+            if (firefox) {
+                doc.addEventListener('DOMMouseScroll', function(e) {
+                    MouseWheel(e, doc);
+                }, false);
             } else {
-                document.getElementById("loadingContainer").innerHTML = `
-                    <div class="block-icon">×</div>
-                    <div class="block-text">访问被拦截</div>
-                    <div class="block-tip">当前域名（${targetDomain}）未在安全白名单内，禁止访问</div>
-                `;
+                doc.onmousewheel = function(e) {
+                    MouseWheel(e || ifr.contentWindow.event, doc);
+                };
             }
         } else {
-            document.getElementById("loadingContainer").innerHTML = `
-                <div class="block-icon">×</div>
-                <div class="block-text">访问异常</div>
-                <div class="block-tip">未检测到有效URL或白名单配置为空</div>
-            `;
+            console.log('检测到跨域iframe，将不绑定滚动事件以避免安全错误');
         }
-    </script>
+    } catch (e) {
+        console.log('绑定滚动事件失败:', e);
+    }
+}
+</script>
+<script type="text/javascript" src="https://js.users.51.la/21480123.js"></script>
 </body>
 </html>
