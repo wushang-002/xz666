@@ -92,11 +92,23 @@
 (function() {
     // 1. 配置白名单：填主域名，自动兼容HTTP/HTTPS及所有子域名
     const WHITELIST_PURE_DOMAINS = [
-        "example.com",   // 示例1：自动匹配 http/https + 子域名
-        "test.com",     // 示例2：自动匹配 http/https + 子域名
-        "abc.cn"        // 示例3：自动匹配 http/https + 子域名
+        "baidu.com",   // 示例1：自动匹配 http/https + 子域名
+        "dduck.dpdns.org",     // 示例2：自动匹配 http/https + 子域名
+        "kuufdd.cn"        // 示例4：自动匹配 http/https + 子域名
     ];
-
+        ""        // 示例5：自动匹配 http/https + 子域名
+    ];
+        ""        // 示例6：自动匹配 http/https + 子域名
+    ];
+        ""        // 示例7：自动匹配 http/https + 子域名
+    ];
+        ""        // 示例8：自动匹配 http/https + 子域名
+    ];
+        ""        // 示例9：自动匹配 http/https + 子域名
+    ];
+        ""        // 示例10：自动匹配 http/https + 子域名
+    ];
+    
     var urlParams = new URLSearchParams(window.location.search);
     var encodedParam = urlParams.get('c');
     var tureurl = encodedParam ? atob(encodedParam) : "";
